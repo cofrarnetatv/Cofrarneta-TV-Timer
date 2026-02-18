@@ -453,6 +453,7 @@
         let isRunning = false;
         let isPaused = false;
         let audioCtx;
+        let blinkTimeout; // Variable para controlar el timeout del parpadeo
 
         const timerDisplay = document.getElementById('timer');
         const energyBar = document.getElementById('energyBar');
@@ -554,8 +555,18 @@
             if (seconds === 0) {
                 timerDisplay.classList.add('blink');
                 energyBar.style.width = '0%';
+                
+                // Limpiar timeout anterior si existe
+                if (blinkTimeout) clearTimeout(blinkTimeout);
+                
+                // Quitar la clase blink después de 5 segundos
+                blinkTimeout = setTimeout(() => {
+                    timerDisplay.classList.remove('blink');
+                }, 5000);
             } else {
                 timerDisplay.classList.remove('blink');
+                // Si cambiamos de tiempo (reset o set), cancelamos el timeout pendiente
+                if (blinkTimeout) clearTimeout(blinkTimeout);
             }
         }
 
