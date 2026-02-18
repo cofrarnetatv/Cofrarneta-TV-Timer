@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cofrarneta TV - Stream Timer</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:ital,wght@0,400;0,700;1,900&family=Russo+One&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --neon-yellow: #FFEA00;
+            --neon-glow: #ffea00;
+            --metal-white: #ffffff;
+            --dark-bg: #000000;
+            --alert-red: #ff3333;
+        }
+
+        * {
+            box-sizing: border-box;
+            user-select: none;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: var(--dark-bg);
+            height: 100vh;
+            width: 100vw; /* Asegurar ancho completo */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Chakra Petch', sans-serif;
+            overflow: hidden;
+            color: white;
+            position: relative;
+        }
+
+        /* --- FONDO DE RAYOS MEJORADO (VERSIÓN 2.0 - MÁS INTENSO) --- */
+        
+        .background-fx {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            z-index: 0;
+            pointer-events: none;
+            overflow: hidden;
+        }
+
+        /* 1. Nebulosa de Energía (Más visible) */
+        .energy-cloud {
+            position: absolute;
+            width: 150vw; height: 150vh;
+            top: -25%; left: -25%;
+            background: radial-gradient(circle, rgba(255, 234, 0, 0.08) 0%, transparent 70%); /* Opacidad aumentada */
+            animation: pulse-cloud 6s infinite alternate; /* Más rápido */
+        }
+
+        /* 2. Rayos Estáticos (Fracturas más visibles) */
+        .lightning-bolt {
+            position: absolute;
+            background-color: #fff;
+            box-shadow: 0 0 15px var(--neon-glow), 0 0 30px var(--neon-glow);
+            opacity: 0.6; /* Base más visible (antes 0.4) */
+        }
+
+        /* Rayo Grande Diagonal (Izquierda Arriba) */
+        .bolt-1 {
+            top: -10%; left: 20%;
+            width: 4px; height: 120%;
+            transform: rotate(25deg);
+            background: linear-gradient(to bottom, transparent, #fff, transparent);
+            animation: flicker-heavy 3s infinite;
+        }
+
+        /* Rayo Ramificado Derecha */
+        .bolt-2 {
+            top: 10%; right: 20%;
+            width: 3px; height: 80%;
+            transform: rotate(-15deg);
+            background: linear-gradient(to bottom, transparent, var(--neon-yellow), transparent);
+            animation: flicker-soft 2.5s infinite 1s;
+        }
+        
+        /* Rayo Horizontal (Suelo) */
+        .bolt-3 {
+            bottom: 10%; left: -10%;
+            width: 120%; height: 3px;
+            transform: rotate(-5deg);
+            background: linear-gradient(to right, transparent, rgba(255,255,255,0.7), transparent);
+            animation: flicker-soft 4s infinite 0.5s;
+        }
+
+        /* --- NUEVOS RAYOS AÑADIDOS --- */
+        
+        /* Rayo Cruzado (Derecha Arriba a Izquierda Abajo) */
+        .bolt-4 {
+            top: -20%; right: 30%;
+            width: 2px; height: 140%;
+            transform: rotate(-35deg);
+            background: linear-gradient(to bottom, transparent, #fff, transparent);
+            animation: flicker-heavy 5s infinite 2s;
+            opacity: 0.5;
+        }
+
+        /* Rayo Pequeño Vertical (Izquierda) */
+        .bolt-5 {
+            top: 30%; left: 5%;
+            width: 2px; height: 40%;
+            transform: rotate(5deg);
+            background: linear-gradient(to bottom, transparent, var(--neon-yellow), transparent);
+            animation: flicker-soft 2s infinite 1.5s;
+        }
+
+        /* Rayo Pequeño Horizontal (Techo) */
+        .bolt-6 {
+            top: 5%; left: 40%;
+            width: 60%; height: 2px;
+            transform: rotate(2deg);
+            background: linear-gradient(to right, transparent, rgba(255,255,255,0.6), transparent);
+            animation: flicker-soft 6s infinite 3s;
+        }
+
+        @keyframes flicker-heavy {
+            0%, 100% { opacity: 0.3; transform: rotate(25deg) scaleX(1); } /* Base más alta */
+            5% { opacity: 1; transform: rotate(25deg) scaleX(2.5); } /* Pico máximo */
+            10% { opacity: 0.3; }
+            15% { opacity: 0.7; }
+            20% { opacity: 0.3; }
+        }
+
+        @keyframes flicker-soft {
+            0%, 100% { opacity: 0.2; }
+            50% { opacity: 0.8; box-shadow: 0 0 25px var(--neon-glow); } /* Pico más alto */
+        }
+
+        @keyframes pulse-cloud {
+            0% { opacity: 0.6; transform: scale(1); }
+            100% { opacity: 0.9; transform: scale(1.15); }
+        }
+
+        /* ------------------------------- */
+
+        /* Contenedor Principal */
+        .main-frame {
+            position: relative;
+            z-index: 10;
+            width: 90%;
+            max-width: 1100px;
+            /* Margen auto para asegurar centrado si flex falla */
+            margin: auto; 
+            background: linear-gradient(135deg, rgba(18, 18, 18, 0.98) 0%, rgba(5, 5, 5, 0.98) 100%);
+            border: 2px solid #333;
+            border-top: 4px solid var(--metal-white);
+            border-bottom: 4px solid var(--neon-yellow);
+            border-radius: 12px;
+            padding: 30px; /* Reducido de 40px */
+            box-shadow: 
+                0 0 60px rgba(0,0,0,1),
+                0 0 20px rgba(255, 234, 0, 0.15); /* Brillo externo amarillo */
+            transform: skewX(-5deg);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center; /* Centrado interno vertical */
+        }
+
+        /* Título Estilizado como el Logo (MODIFICADO PARA IMAGEN) */
+        .brand-header {
+            margin-bottom: -50px; /* Margen negativo agresivo para superponer */
+            transform: skewX(5deg); /* Contrarrestar la inclinación del padre */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            text-align: center;
+            z-index: 1; /* Detrás del contador */
+            position: relative;
+        }
+
+        .logo-img {
+            max-width: 100%;
+            width: 550px; /* Tamaño generoso para el logo */
+            height: auto;
+            display: block;
+            margin: 0 auto; /* Centrado de bloque */
+            /* Sombra para darle profundidad sobre el fondo oscuro */
+            filter: drop-shadow(0 0 20px rgba(0, 0, 0, 0.8));
+        }
+
+        /* CRONÓMETRO */
+        .timer-display {
+            font-family: 'Russo One', sans-serif;
+            font-size: 13rem; /* Ligeramente más grande */
+            line-height: 0.9;
+            color: var(--metal-white);
+            /* Sombra fuerte para que se lea sobre el logo si se tocan */
+            text-shadow: 
+                4px 4px 0px #000, 
+                0 0 30px rgba(0, 0, 0, 0.8),
+                0 0 10px rgba(0,0,0,1);
+            margin: 0; /* Sin margen */
+            margin-top: -10px; /* Subir un poco más */
+            margin-bottom: 10px;
+            transform: skewX(5deg);
+            font-variant-numeric: tabular-nums;
+            position: relative;
+            z-index: 2; /* Encima del logo */
+            text-align: center;
+        }
+
+        /* Barra de Energía */
+        .energy-bar-container {
+            width: 100%;
+            height: 8px;
+            background: #222;
+            margin-bottom: 25px; /* Reducido de 40px */
+            transform: skewX(5deg);
+            overflow: hidden;
+            border-radius: 4px;
+        }
+
+        .energy-bar {
+            height: 100%;
+            width: 100%;
+            background: var(--neon-yellow);
+            box-shadow: 0 0 15px var(--neon-yellow);
+            transition: width 1s linear;
+        }
+
+        /* Controles */
+        .control-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 20px; /* Reducido de 30px */
+            width: 100%;
+            align-items: center;
+            justify-content: center;
+            transform: skewX(5deg);
+        }
+
+        .presets-row {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .actions-row {
+            display: flex;
+            gap: 20px;
+            margin-top: 5px; /* Reducido */
+            justify-content: center;
+        }
+
+        button {
+            border: none;
+            outline: none;
+            cursor: pointer;
+            font-family: 'Chakra Petch', sans-serif;
+            font-weight: 700;
+            text-transform: uppercase;
+            transition: all 0.1s ease;
+            letter-spacing: 1px;
+            position: relative;
+        }
+
+        button:active { transform: scale(0.95); }
+
+        .btn-preset {
+            background: rgba(255, 234, 0, 0.05);
+            color: var(--neon-yellow);
+            border: 2px solid var(--neon-yellow);
+            box-shadow: inset 0 0 10px rgba(255, 234, 0, 0.05);
+            font-size: 2rem;
+            padding: 15px 25px;
+            min-width: 120px;
+            clip-path: polygon(15px 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%, 0 15px);
+        }
+
+        .btn-preset:hover {
+            background: var(--neon-yellow);
+            color: black;
+            box-shadow: 0 0 30px var(--neon-glow);
+            transform: translateY(-2px);
+        }
+
+        /* Input Custom */
+        .custom-input-group {
+            display: flex;
+            align-items: center;
+            background: rgba(255,255,255,0.05);
+            padding: 5px;
+            border: 1px solid #444;
+            clip-path: polygon(15px 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%, 0 15px);
+        }
+
+        .btn-step {
+            background: #222;
+            color: white;
+            font-size: 2.5rem;
+            width: 60px;
+            height: 70px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid #444;
+        }
+        
+        .btn-step:hover {
+            background: var(--neon-yellow);
+            color: black;
+            border-color: var(--neon-yellow);
+        }
+
+        #customMinutes {
+            background: transparent;
+            border: none;
+            color: var(--neon-yellow);
+            font-family: 'Russo One', sans-serif;
+            font-size: 3rem;
+            width: 100px;
+            text-align: center;
+            appearance: none;
+            -moz-appearance: textfield;
+        }
+        
+        #customMinutes:focus { outline: none; }
+        input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+
+        #btn-set-custom {
+            background: var(--neon-yellow);
+            color: black;
+            font-size: 1.5rem;
+            height: 70px;
+            padding: 0 20px;
+            margin-left: 5px;
+            font-weight: 900;
+        }
+        #btn-set-custom:hover { background: white; box-shadow: 0 0 20px white; }
+
+        /* Botones de Acción */
+        .btn-start {
+            background: var(--neon-yellow);
+            color: black;
+            font-size: 2rem;
+            padding: 20px 80px;
+            font-weight: 900;
+            clip-path: polygon(20px 0, 100% 0, 100% calc(100% - 20px), calc(100% - 20px) 100%, 0 100%, 0 20px);
+        }
+        .btn-start:hover { box-shadow: 0 0 50px var(--neon-glow); transform: scale(1.05); }
+
+        .btn-stop {
+            background: #333;
+            color: white;
+            border: 1px solid #555;
+            font-size: 1.2rem;
+            padding: 15px 30px;
+            clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
+        }
+        .btn-stop:hover { background: #444; border-color: #fff; }
+
+        .btn-reset {
+            background: transparent;
+            color: #ff5555;
+            border: 2px solid #ff5555;
+            font-size: 1.2rem;
+            padding: 15px 30px;
+            clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
+        }
+        .btn-reset:hover { background: #ff5555; color: white; box-shadow: 0 0 25px rgba(255, 85, 85, 0.5); }
+
+        /* Modos */
+        .panic-mode .timer-display {
+            color: var(--alert-red);
+            text-shadow: 0 0 40px rgba(255, 0, 0, 0.8);
+            animation: pulse 0.5s infinite alternate;
+        }
+        
+        .panic-mode .energy-bar {
+            background: var(--alert-red);
+            box-shadow: 0 0 30px var(--alert-red);
+        }
+
+        .blink { animation: blinker 0.5s linear infinite; }
+
+        @keyframes pulse {
+            0% { transform: skewX(5deg) scale(1); }
+            100% { transform: skewX(5deg) scale(1.05); }
+        }
+        @keyframes blinker { 50% { opacity: 0; } }
+
+        @media (max-width: 900px) {
+            .timer-display { font-size: 8rem; }
+            .btn-start { padding: 15px 40px; font-size: 1.5rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- FONDO NUEVO DE RAYOS (DOBLE DE CANTIDAD) -->
+    <div class="background-fx">
+        <div class="energy-cloud"></div>
+        <!-- Originales -->
+        <div class="lightning-bolt bolt-1"></div>
+        <div class="lightning-bolt bolt-2"></div>
+        <div class="lightning-bolt bolt-3"></div>
+        <!-- Nuevos para más intensidad -->
+        <div class="lightning-bolt bolt-4"></div>
+        <div class="lightning-bolt bolt-5"></div>
+        <div class="lightning-bolt bolt-6"></div>
+    </div>
+
+    <div class="main-frame" id="mainFrame">
+        <!-- CABECERA CON LOGO OFICIAL (Corregido a .png) -->
+        <div class="brand-header">
+            <img src="Cofrarneta_Logo.png" alt="Cofrarneta TV Logo" class="logo-img">
+        </div>
+
+        <div class="timer-display" id="timer">00:00</div>
+        
+        <div class="energy-bar-container">
+            <div class="energy-bar" id="energyBar"></div>
+        </div>
+
+        <div class="control-panel">
+            <div class="presets-row">
+                <button class="btn-preset" onclick="setSeconds(30)">30S</button>
+                <button class="btn-preset" onclick="setMinutes(1)">1M</button>
+                <button class="btn-preset" onclick="setMinutes(3)">3M</button>
+                <button class="btn-preset" onclick="setMinutes(5)">5M</button>
+                
+                <div class="custom-input-group">
+                    <button class="btn-step" onclick="stepMinutes(-1)">-</button>
+                    <input type="number" id="customMinutes" value="1" min="1" max="999">
+                    <button class="btn-step" onclick="stepMinutes(1)">+</button>
+                    <button id="btn-set-custom" onclick="setCustom()">SET</button>
+                </div>
+            </div>
+
+            <div class="actions-row">
+                <button class="btn-stop" onclick="pauseTimer()">PAUSA</button>
+                <button class="btn-start" onclick="startTimer()" id="startBtn">INICIAR</button>
+                <button class="btn-reset" onclick="resetTimer()">RESET</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let countdown;
+        let totalSeconds;
+        let initialSeconds = 300; 
+        let isRunning = false;
+        let isPaused = false;
+        let audioCtx;
+
+        const timerDisplay = document.getElementById('timer');
+        const energyBar = document.getElementById('energyBar');
+        const mainFrame = document.getElementById('mainFrame');
+        const startBtn = document.getElementById('startBtn');
+        const customInput = document.getElementById('customMinutes');
+
+        updateDisplay(initialSeconds);
+
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+        }
+
+        // --- SONIDO 1: CUENTA REGRESIVA POTENTE ---
+        function playTensionBeep() {
+            if (!audioCtx) return;
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+
+            // Cambiado a 'square' para más agresividad (sonido 8-bit fuerte)
+            osc.type = 'square'; 
+            osc.frequency.setValueAtTime(800, audioCtx.currentTime); 
+            
+            // VOLUMEN ALTO (0.8 - casi el máximo sin distorsionar demasiado)
+            gain.gain.setValueAtTime(0, audioCtx.currentTime);
+            gain.gain.linearRampToValueAtTime(0.8, audioCtx.currentTime + 0.05);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.2);
+
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.25);
+        }
+
+        // --- SONIDO 2: ALARMA CORTA Y AGRESIVA ---
+        function playAlarm() {
+            if (!audioCtx) return;
+            const now = audioCtx.currentTime;
+            
+            const osc1 = audioCtx.createOscillator();
+            const osc2 = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            
+            osc1.connect(gain);
+            osc2.connect(gain);
+            gain.connect(audioCtx.destination);
+
+            osc1.type = 'sawtooth';
+            osc2.type = 'sawtooth';
+
+            // DURACIÓN CORTA: 2.5 segundos
+            const duration = 2.5;
+
+            // Barrido rápido estilo sirena de ataque
+            // Sube rápido, baja un poco, sube de nuevo
+            osc1.frequency.setValueAtTime(150, now);
+            osc1.frequency.linearRampToValueAtTime(800, now + 1.0);
+            osc1.frequency.linearRampToValueAtTime(400, now + 1.5);
+            osc1.frequency.linearRampToValueAtTime(800, now + 2.0);
+            osc1.frequency.linearRampToValueAtTime(100, now + duration);
+
+            // Oscilador 2 desafinado para disonancia máxima
+            osc2.frequency.setValueAtTime(155, now);
+            osc2.frequency.linearRampToValueAtTime(810, now + 1.0);
+            osc2.frequency.linearRampToValueAtTime(410, now + 1.5);
+            osc2.frequency.linearRampToValueAtTime(810, now + 2.0);
+            osc2.frequency.linearRampToValueAtTime(105, now + duration);
+
+            // Volumen
+            gain.gain.setValueAtTime(0.4, now);
+            gain.gain.linearRampToValueAtTime(0, now + duration);
+
+            osc1.start(now);
+            osc2.start(now);
+            osc1.stop(now + duration);
+            osc2.stop(now + duration);
+        }
+
+        function displayTimeLeft(seconds) {
+            const minutes = Math.floor(seconds / 60);
+            const remainderSeconds = seconds % 60;
+            const display = `${minutes < 10 ? '0' : ''}${minutes}:${remainderSeconds < 10 ? '0' : ''}${remainderSeconds}`;
+            timerDisplay.textContent = display;
+
+            const percentage = (seconds / initialSeconds) * 100;
+            energyBar.style.width = `${percentage}%`;
+
+            if (seconds <= 60 && seconds > 0) {
+                mainFrame.classList.add('panic-mode');
+            } else {
+                mainFrame.classList.remove('panic-mode');
+            }
+
+            if (seconds === 0) {
+                timerDisplay.classList.add('blink');
+                energyBar.style.width = '0%';
+            } else {
+                timerDisplay.classList.remove('blink');
+            }
+        }
+
+        function timer(seconds) {
+            clearInterval(countdown);
+            const now = Date.now();
+            const then = now + seconds * 1000;
+            displayTimeLeft(seconds);
+
+            countdown = setInterval(() => {
+                const secondsLeft = Math.round((then - Date.now()) / 1000);
+
+                if(secondsLeft < 0) {
+                    clearInterval(countdown);
+                    isRunning = false;
+                    startBtn.textContent = "INICIAR";
+                    return;
+                }
+
+                if(secondsLeft === 0) {
+                    playAlarm();
+                } else if(secondsLeft <= 10 && secondsLeft > 0) {
+                    playTensionBeep();
+                }
+
+                totalSeconds = secondsLeft;
+                displayTimeLeft(secondsLeft);
+            }, 1000);
+        }
+
+        function startTimer() {
+            initAudio();
+            if (isRunning) return;
+            const seconds = isPaused ? totalSeconds : initialSeconds;
+            timer(seconds);
+            isRunning = true;
+            isPaused = false;
+            startBtn.textContent = "EN VIVO";
+            startBtn.style.boxShadow = "0 0 40px var(--neon-yellow)";
+        }
+
+        function pauseTimer() {
+            if (!isRunning) return;
+            clearInterval(countdown);
+            isRunning = false;
+            isPaused = true;
+            startBtn.textContent = "REANUDAR";
+            startBtn.style.boxShadow = "none";
+            timerDisplay.classList.add('blink');
+        }
+
+        function resetTimer() {
+            clearInterval(countdown);
+            isRunning = false;
+            isPaused = false;
+            totalSeconds = initialSeconds;
+            displayTimeLeft(initialSeconds);
+            startBtn.textContent = "INICIAR";
+            startBtn.style.boxShadow = "none";
+            mainFrame.classList.remove('panic-mode');
+            timerDisplay.classList.remove('blink');
+        }
+
+        function setMinutes(mins) {
+            pauseTimer();
+            initialSeconds = mins * 60;
+            totalSeconds = initialSeconds;
+            isPaused = false;
+            resetTimer();
+        }
+
+        function setSeconds(secs) {
+            pauseTimer();
+            initialSeconds = secs;
+            totalSeconds = initialSeconds;
+            isPaused = false;
+            resetTimer();
+        }
+
+        function setCustom() {
+            const val = parseInt(customInput.value);
+            if(val && val > 0) {
+                setMinutes(val);
+            }
+        }
+
+        function stepMinutes(step) {
+            let currentVal = parseInt(customInput.value) || 0;
+            let newVal = currentVal + step;
+            if(newVal < 1) newVal = 1;
+            customInput.value = newVal;
+        }
+
+        function updateDisplay(seconds) {
+            displayTimeLeft(seconds);
+        }
+    </script>
+</body>
+</html>
