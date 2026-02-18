@@ -187,8 +187,18 @@
             height: auto;
             display: block;
             margin: 0 auto; /* Centrado de bloque */
-            /* Sombra para darle profundidad sobre el fondo oscuro */
-            filter: drop-shadow(0 0 20px rgba(0, 0, 0, 0.8));
+            
+            /* Sombra NEGRA para profundidad + GLOW AMARILLO para neón */
+            filter: drop-shadow(0 0 15px var(--neon-glow)) drop-shadow(0 0 30px rgba(0,0,0,0.9));
+            
+            /* Animación de flotación suave */
+            animation: logo-float 4s ease-in-out infinite;
+        }
+
+        /* Animación de flotación del logo */
+        @keyframes logo-float {
+            0%, 100% { transform: translateY(0) scale(1); }
+            50% { transform: translateY(-8px) scale(1.02); }
         }
 
         /* CRONÓMETRO */
